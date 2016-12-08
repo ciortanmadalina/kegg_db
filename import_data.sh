@@ -1,7 +1,10 @@
 #!/bin/bash
 # This script generates sql insert scripts for data import
 
-readonly N=1
+readonly N=3
+readonly join_file="insert_into_raw_pathway_module.sql"
+rm "$join_file"
+
 
 if [ ! -f pathway ]; then
   curl http://rest.kegg.jp/list/pathway > pathway
@@ -37,8 +40,6 @@ read_pathway_modules ()
   modules+=( $(awk '{print $1}' "$path" | grep -o 'M[0-9]\{5,6\}') )
 
   echo "Modules array ${modules[@]} "
-  join_file="insert_into_raw_pathway_module.sql"
-  rm "$join_file"
 
   for module in "${modules[@]}"
   do

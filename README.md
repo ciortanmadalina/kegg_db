@@ -8,3 +8,8 @@ schema.sql creates the psql schema. A number of "raw" tables have been created t
 import_data.sh makes get calls to rest webservices, parses the input and generates insert sql files ( e.g. insert_into_raw_pathway.sql, insert_into_raw_pathway_module.sql, etc)  
 
 setup_db.sh first creates the schema using schema.sql, then invokes the insert files in order to populate the raw version of our tables.
+
+
+There are cases when 1 modules has references for multiple reactions comma separated:
+http://rest.kegg.jp/get/M00633
+Even though in the modules file both reactions point to the same componds, the detailed pages point to different results.This scenario can be found from path http://rest.kegg.jp/get/path:map00030 (last module).

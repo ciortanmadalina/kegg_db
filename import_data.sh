@@ -2,9 +2,11 @@
 # This script generates sql insert scripts for data import
 
 readonly N=3
-readonly join_file="insert_into_raw_pathway_module.sql"
+readonly join_file="output/insert_into_raw_pathway_module.sql"
 rm "$join_file"
-
+unique_modules=()
+rm -r output
+mkdir output
 
 if [ ! -f pathway ]; then
   curl http://rest.kegg.jp/list/pathway > pathway
@@ -12,7 +14,7 @@ fi
 
 read_pathways ()
 {
-  insert_file="insert_into_raw_pathway.sql"
+  insert_file="output/insert_into_raw_pathway.sql"
   rm "$insert_file"
   for i in $(seq 1 $N)
   do
@@ -39,13 +41,30 @@ read_pathway_modules ()
   modules+=( $(grep "^MODULE" "$path" | awk '{print $2}') )
   modules+=( $(awk '{print $1}' "$path" | grep -o 'M[0-9]\{5,6\}') )
 
+  unique_modules=("${unique_modules[@]}" "${modules[@]}")
+  unique_modules=$(unique_values $unique_modules)
   echo "Modules array ${modules[@]} "
 
   for module in "${modules[@]}"
   do
     echo "INSERT INTO raw_pathway_module(pathway, module) VALUES ('$path', '$module');" >> "$join_file"
+    #download module file if it doesn't exist
+    if [ ! -f "$module" ]; then
+      curl "http://rest.kegg.jp/get/$module" > "$module"
+    fi
+    python3 parse_module.py "$module"
+   
   done
 
+  echo "Global modules array ${unique_modules[@]} "
+}
+
+unique_values ()
+{
+  input=$1
+  unique=($(printf "%s\n" "${input[@]}" | sort -u))
+  #return unique
+  echo ${unique[@]}
 }
 
 #invocations

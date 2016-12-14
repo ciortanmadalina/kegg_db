@@ -8,12 +8,24 @@ if len(sys.argv) != 2 :
     print('You provided ' ,(len(sys.argv) - 1 ) , ' arguments. \n Please run parse_module.py <module_name>')
     sys.exit(2)
 
-startReadFrom = "REACTION"
 module = sys.argv[1]
 
-moduleReactionFileName = 'output/insert_module_reaction.sql'
-reactionCompoundsFileName = 'output/insert_reaction_compound.sql'
-compoundsFileName = 'output/insert_compound.sql'
+moduleReactionFileName = 'insert_module_reaction.sql'
+reactionCompoundsFileName = 'insert_reaction_compound.sql'
+
+#read file
+f=open(module)
+data=f.read()
+f.close()
+
+'''
+Retrieves paragraph section by name (REACTION),
+returns an array whitespace trimmed
+'''
+def getSectionArray(name):
+    pattern = re.compile(r"" + name + "((.*\n)*?)[A-Z]+")
+    resultLines = pattern.search(data).group(1).strip().split('\n')
+    return [ r.strip() for r in resultLines]
 
 def removeDuplicateLines(filename):
     uniqlines = set(open(filename).readlines())
@@ -28,6 +40,7 @@ def parseReactions(reactions):
         # line looks like R05605  C04442 -> C00022 + C00118
         tokens = line.split()
         reaction_name = tokens[0]
+        reaction_name= re.split('\+|,', reaction_name)[0]
         moduleReactionsFile.write("INSERT INTO raw_module_reaction (module, reaction) VALUES '" + module + "' , '" + reaction_name + "');\n")
         type = 'INPUT'
         for i in range(1, len(tokens)):
@@ -47,19 +60,8 @@ def parseReactions(reactions):
     removeDuplicateLines(moduleReactionFileName)
     removeDuplicateLines(reactionCompoundsFileName)
 
-reactions = []
-with open(module, 'r') as f:
-    ignore = True
-    for line in f:
-        if ignore and line.startswith(startReadFrom):
-            reactions.append(line[len(startReadFrom):-1].strip())
-            ignore = False
-            continue
-        if ignore == False:
-            if re.match(r'\s', line):
-                reactions.append(line.strip())
-            else:
-                ignore=True
+#Method invocations
 
+reactions = getSectionArray("REACTION")
 parseReactions(reactions)
 

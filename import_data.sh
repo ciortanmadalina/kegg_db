@@ -2,8 +2,8 @@
 # This script generates sql insert scripts for data import
 
 readonly N=3
-readonly join_file="output/insert_into_raw_pathway_module.sql"
-rm "$join_file"
+readonly pathway_module_file="output/insert_into_raw_pathway_module.sql"
+readonly compounds_file="output/insert_into_raw_compound.sql"
 unique_modules=()
 rm -r output
 mkdir output
@@ -47,7 +47,7 @@ read_pathway_modules ()
 
   for module in "${modules[@]}"
   do
-    echo "INSERT INTO raw_pathway_module(pathway, module) VALUES ('$path', '$module');" >> "$join_file"
+    echo "INSERT INTO raw_pathway_module(pathway, module) VALUES ('$path', '$module');" >> "$pathway_module_file"
     #download module file if it doesn't exist
     if [ ! -f "$module" ]; then
       curl "http://rest.kegg.jp/get/$module" > "$module"
@@ -59,6 +59,21 @@ read_pathway_modules ()
   echo "Global modules array ${unique_modules[@]} "
 }
 
+compounds_from_insert_file ()
+{
+  compounds=($(awk '{print $10}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
+  #echo "Compounds: $compounds"
+  for compound in "${compounds[@]}"
+  do
+    echo "compound= $compound"
+    #download module file if it doesn't exist
+    if [ ! -f "$compound" ]; then
+      curl "http://rest.kegg.jp/get/$compound" > "$compound"
+    fi
+
+
+  done
+}
 unique_values ()
 {
   input=$1
@@ -69,3 +84,4 @@ unique_values ()
 
 #invocations
 read_pathways
+compounds_from_insert_file

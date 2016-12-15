@@ -2,7 +2,7 @@
 import re
 import sys
 
-print ('Number of arguments:', len(sys.argv), 'arguments.', str(sys.argv))
+#print ('Number of arguments:', len(sys.argv), 'arguments.', str(sys.argv))
 
 if len(sys.argv) != 2 :
     print('You provided ' ,(len(sys.argv) - 1 ) , ' arguments. \n Please run parse_module.py <module_name>')
@@ -10,8 +10,8 @@ if len(sys.argv) != 2 :
 
 module = sys.argv[1]
 
-moduleReactionFileName = 'insert_module_reaction.sql'
-reactionCompoundsFileName = 'insert_reaction_compound.sql'
+moduleReactionFileName = 'output/insert_module_reaction.sql'
+reactionCompoundsFileName = 'output/insert_reaction_compound.sql'
 
 #read file
 f=open(module)
@@ -24,8 +24,11 @@ returns an array whitespace trimmed
 '''
 def getSectionArray(name):
     pattern = re.compile(r"" + name + "((.*\n)*?)[A-Z]+")
-    resultLines = pattern.search(data).group(1).strip().split('\n')
-    return [ r.strip() for r in resultLines]
+    search = pattern.search(data)
+    if search != None:
+      resultLines = search.group(1).strip().split('\n')
+      return [ r.strip() for r in resultLines]
+    return []
 
 def removeDuplicateLines(filename):
     uniqlines = set(open(filename).readlines())

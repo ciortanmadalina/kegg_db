@@ -2,8 +2,7 @@
 # This script generates sql insert scripts for data import
 
 readonly N=3
-readonly pathway_module_file="output/insert_into_raw_pathway_module.sql"
-readonly compounds_file="output/insert_into_raw_compound.sql"
+readonly pathway_module_file="output/insert_pathway_module.sql"
 unique_modules=()
 rm -r output
 mkdir output
@@ -14,7 +13,7 @@ fi
 
 read_pathways ()
 {
-  insert_file="output/insert_into_raw_pathway.sql"
+  insert_file="output/insert_pathway.sql"
   rm "$insert_file"
   for i in $(seq 1 $N)
   do
@@ -65,12 +64,13 @@ compounds_from_insert_file ()
   #echo "Compounds: $compounds"
   for compound in "${compounds[@]}"
   do
-    echo "compound= $compound"
+    #echo "compound= $compound"
     #download module file if it doesn't exist
     if [ ! -f "$compound" ]; then
       curl "http://rest.kegg.jp/get/$compound" > "$compound"
     fi
 
+    python3 parse_compound.py "$compound"
 
   done
 }

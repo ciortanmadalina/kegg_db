@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import re
 import sys
+import utils
 
 #print ('Number of arguments:', len(sys.argv), 'arguments.', str(sys.argv))
 
@@ -14,27 +15,8 @@ moduleReactionFileName = 'output/insert_module_reaction.sql'
 reactionCompoundsFileName = 'output/insert_reaction_compound.sql'
 
 #read file
-f=open(module)
-data=f.read()
-f.close()
+data=utils.getFileContent(module)
 
-'''
-Retrieves paragraph section by name (REACTION),
-returns an array whitespace trimmed
-'''
-def getSectionArray(name):
-    pattern = re.compile(r"" + name + "((.*\n)*?)[A-Z]+")
-    search = pattern.search(data)
-    if search != None:
-      resultLines = search.group(1).strip().split('\n')
-      return [ r.strip() for r in resultLines]
-    return []
-
-def removeDuplicateLines(filename):
-    uniqlines = set(open(filename).readlines())
-    f = open(filename, 'w')
-    f.writelines(set(uniqlines))
-    f.close()
 
 def parseReactions(reactions):
     moduleReactionsFile = open(moduleReactionFileName, 'a')
@@ -60,11 +42,11 @@ def parseReactions(reactions):
     moduleReactionsFile.close()
     reactionCompoundsFile.close()
     #better clean up in bash
-    removeDuplicateLines(moduleReactionFileName)
-    removeDuplicateLines(reactionCompoundsFileName)
+    utils.removeDuplicateLines(moduleReactionFileName)
+    utils.removeDuplicateLines(reactionCompoundsFileName)
 
 #Method invocations
 
-reactions = getSectionArray("REACTION")
+reactions = utils.getSectionArray("REACTION", data,  "\n")
 parseReactions(reactions)
 

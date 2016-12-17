@@ -74,6 +74,39 @@ compounds_from_insert_file ()
 
   done
 }
+
+
+reactions_from_insert_file ()
+{
+  reactions=($(awk '{print $8}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
+  for reaction in "${reactions[@]}"
+  do
+    #download module file if it doesn't exist
+    if [ ! -f "$reaction" ]; then
+      curl "http://rest.kegg.jp/get/$reaction" > "$reaction"
+    fi
+
+    python3 parse_reaction.py "$reaction"
+
+  done
+}
+
+enzymes_from_insert_file ()
+{
+  enzymes=($(awk '{print $9}' output/insert_reaction_enzyme.sql | sed "s/'//g" | sort -u))
+  for enzyme in "${enzymes[@]}"
+  do
+    #download module file if it doesn't exist
+    if [ ! -f "$enzyme" ]; then
+      curl "http://rest.kegg.jp/get/$enzyme" > "$enzyme"
+    fi
+
+    python3 parse_enzyme.py "$enzyme"
+
+  done
+}
+
+
 unique_values ()
 {
   input=$1
@@ -85,3 +118,5 @@ unique_values ()
 #invocations
 read_pathways
 compounds_from_insert_file
+reactions_from_insert_file
+enzymes_from_insert_file

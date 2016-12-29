@@ -46,7 +46,7 @@ name varchar (700)
 
 
 CREATE TABLE biological_molecule (
-id varchar (10) PRIMARY KEY,
+id varchar (10),
 name varchar(500),
 formula varchar(100),
 mass varchar (100),
@@ -54,7 +54,7 @@ type varchar(1)
 );
 
 CREATE TABLE reaction (
-id varchar (10) PRIMARY KEY,
+id varchar (10),
 name varchar (300),
 definition varchar (300)
 );
@@ -65,7 +65,7 @@ name varchar (700)
 );
 
 CREATE TABLE pathway (
-id varchar(10) PRIMARY KEY,
+id varchar(10),
 name varchar (200),
 description varchar (5000),
 class varchar(100) 

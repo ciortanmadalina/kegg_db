@@ -17,6 +17,17 @@ for enzyme in enzymes:
 
 outputFile.close()
 
+name=utils.getSectionString("NAME", data)
+name=name.replace("'","")
+definition=utils.getSectionString("DEFINITION",data)
+definition=definition.replace("'", "")
+reactionFileName = 'output/insert_reaction.sql'
+outputFile = open (reactionFileName, 'a')
+for enzyme in enzymes:
+    outputFile.write(
+        "INSERT INTO raw_reaction (id, name, definition) VALUES ( '" + reaction + "' , '" + name + "' , '" + definition +"' );\n")
+
+outputFile.close()
 
 
 

@@ -21,7 +21,7 @@ CREATE TABLE raw_pathway_module (
   
 CREATE TABLE raw_compound (
     id varchar (10),
-    name varchar(400),
+    name varchar(500),
     formula varchar(100),
     mass varchar (100));
   

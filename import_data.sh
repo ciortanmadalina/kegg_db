@@ -53,7 +53,7 @@ read_modules ()
 
 compounds_from_insert_file ()
 {
-  compounds=($(awk '{print $9}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
+  compounds=($(awk '{print $11}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
   #echo "Compounds: $compounds"
   for compound in "${compounds[@]}"
   do

@@ -26,7 +26,7 @@ def parseReactions(reactions):
         tokens = line.split()
         reaction_name = tokens[0]
         reaction_name= re.split('\+|,', reaction_name)[0]
-        moduleReactionsFile.write("INSERT INTO raw_module_reaction (module, reaction) VALUES '" + module + "' , '" + reaction_name + "');\n")
+        moduleReactionsFile.write("INSERT INTO raw_module_reaction (module, reaction) VALUES ( '" + module + "' , '" + reaction_name + "' );\n")
         type = 'INPUT'
         for i in range(1, len(tokens)):
             if tokens[i] == '+':
@@ -35,8 +35,8 @@ def parseReactions(reactions):
                 type = 'OUTPUT'
                 continue
             reactionCompoundsFile.write(
-                "INSERT INTO raw_reaction_compound (reaction, compound, type) VALUES '" + reaction_name + "' , '"
-                + tokens[i]  + "' , '" +  type + "');\n")
+                "INSERT INTO raw_reaction_compound (reaction, compound, type) VALUES ( '" + reaction_name + "' , '"
+                + tokens[i]  + "' , '" +  type + "' );\n")
 
         print(line)
     moduleReactionsFile.close()

@@ -20,7 +20,7 @@ parse_input_file ()
   do
     path=$(echo $line | awk '{print $1}')
     module=$(echo $line | awk '{print $2}')
-   echo " INSERT INTO raw_pathway_module(path, module) VALUES ('${path}', '${module}'); " >>"$insert_file"
+   echo " INSERT INTO raw_pathway_module(pathway, module) VALUES ('${path}', '${module}'); " >>"$insert_file"
   
     read_pathways $path
     read_modules $module
@@ -53,7 +53,7 @@ read_modules ()
 
 compounds_from_insert_file ()
 {
-  compounds=($(awk '{print $10}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
+  compounds=($(awk '{print $9}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
   #echo "Compounds: $compounds"
   for compound in "${compounds[@]}"
   do
@@ -71,7 +71,7 @@ compounds_from_insert_file ()
 
 reactions_from_insert_file ()
 {
-  reactions=($(awk '{print $8}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
+  reactions=($(awk '{print $9}' output/insert_reaction_compound.sql | sed "s/'//g" | sort -u))
   for reaction in "${reactions[@]}"
   do
     #download module file if it doesn't exist

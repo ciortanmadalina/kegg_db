@@ -11,23 +11,23 @@ if [ ! -f pathway ]; then
   curl http://rest.kegg.jp/list/pathway > pathway
 fi
 
-read_pathways ()
+parse_input_file ()
 {
-  insert_file="output/insert_pathway.sql"
-  rm "$insert_file"
-  for i in $(seq 1 $N)
-  do
-    read line
-    echo $line
-    path=$(echo $line | awk '{print $1}')
-    desc=$(echo $line | awk '{print $2}')
-    echo "INSERT INTO raw_pathway(name, description) VALUES ('$path', '$desc');" >>"$insert_file"
-    read_pathway_modules $path
+  input_file="input"
 
-  done < pathway
+  insert_file="output/insert_pathway_module.sql"
+  while read -r line
+  do
+    path=$(echo $line | awk '{print $1}')
+    module=$(echo $line | awk '{print $2}')
+   echo " INSERT INTO raw_pathway_module(path, module) VALUES ('${path}', '${module}'); " >>"$insert_file"
+  
+    read_pathways $path
+    read_modules $module
+  done < "$input_file"
 }
 
-read_pathway_modules ()
+read_pathways ()
 {
   path=$1
   echo "reading modules for $path"
@@ -36,26 +36,19 @@ read_pathway_modules ()
     curl "http://rest.kegg.jp/get/$path" > "$path"
   fi
  
-  modules=()
-  modules+=( $(grep "^MODULE" "$path" | awk '{print $2}') )
-  modules+=( $(awk '{print $1}' "$path" | grep -o 'M[0-9]\{5,6\}') )
+  python3 scripts/parse_pathway.py "$path"
 
-  unique_modules=("${unique_modules[@]}" "${modules[@]}")
-  unique_modules=$(unique_values $unique_modules)
-  echo "Modules array ${modules[@]} "
+}
 
-  for module in "${modules[@]}"
-  do
-    echo "INSERT INTO raw_pathway_module(pathway, module) VALUES ('$path', '$module');" >> "$pathway_module_file"
-    #download module file if it doesn't exist
-    if [ ! -f "$module" ]; then
-      curl "http://rest.kegg.jp/get/$module" > "$module"
-    fi
-    python3 parse_module.py "$module"
-   
-  done
 
-  echo "Global modules array ${unique_modules[@]} "
+read_modules ()
+{
+  module=$1
+  #download module file if it doesn't exist
+  if [ ! -f "$module" ]; then
+    curl "http://rest.kegg.jp/get/$module" > "$module"
+  fi
+  python3 scripts/parse_module.py "$module"
 }
 
 compounds_from_insert_file ()
@@ -70,7 +63,7 @@ compounds_from_insert_file ()
       curl "http://rest.kegg.jp/get/$compound" > "$compound"
     fi
 
-    python3 parse_compound.py "$compound"
+    python3 scripts/parse_compound.py "$compound"
 
   done
 }
@@ -86,7 +79,7 @@ reactions_from_insert_file ()
       curl "http://rest.kegg.jp/get/$reaction" > "$reaction"
     fi
 
-    python3 parse_reaction.py "$reaction"
+    python3 scripts/parse_reaction.py "$reaction"
 
   done
 }
@@ -101,7 +94,7 @@ enzymes_from_insert_file ()
       curl "http://rest.kegg.jp/get/$enzyme" > "$enzyme"
     fi
 
-    python3 parse_enzyme.py "$enzyme"
+    python3 scripts/parse_enzyme.py "$enzyme"
 
   done
 }
@@ -116,7 +109,7 @@ unique_values ()
 }
 
 #invocations
-read_pathways
+parse_input_file
 compounds_from_insert_file
 reactions_from_insert_file
 enzymes_from_insert_file

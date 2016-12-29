@@ -20,7 +20,7 @@ enzymes=utils.getSectionArray("ENZYME", data, None)
 outputFile = open (outputFileName, 'a')
 for enzyme in enzymes:
     outputFile.write(
-        "INSERT INTO raw_reaction_enzyme (reaction, enzyme) VALUES ('" + reaction + "' , '" + enzyme + "' );\n")
+        "INSERT INTO raw_reaction_enzyme (reaction, enzyme) VALUES ('" + reaction + "' , '" + enzyme + " ');\n")
 
 outputFile.close()
 

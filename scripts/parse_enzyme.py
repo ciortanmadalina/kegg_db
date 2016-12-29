@@ -2,7 +2,6 @@
 import re
 import sys
 import utils
-print ('Number of arguments:', len(sys.argv), 'arguments.', str(sys.argv))
 
 if len(sys.argv) != 2 :
     print('You provided ' ,(len(sys.argv) - 1 ) , ' arguments. \n Please run parse_module.py <module_name>')

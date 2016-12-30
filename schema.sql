@@ -45,6 +45,13 @@ name varchar (700)
 );
 
 
+CREATE TABLE raw_reaction_order (
+parentid varchar(10),
+childid varchar(10),
+loop boolean DEFAULT false,
+module varchar(10)
+);
+
 CREATE TABLE biological_molecule (
 id varchar (10),
 name varchar(500),
@@ -87,3 +94,11 @@ CREATE TABLE reaction_enzyme (
 reaction_id varchar (10),
 enzyme_id varchar (15)
 );
+
+CREATE TABLE reaction_order (
+    parentid varchar(10),
+    childid varchar(10),
+    loop boolean DEFAULT false,
+    pathway varchar(10)
+);
+

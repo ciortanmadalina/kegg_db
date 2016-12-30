@@ -56,7 +56,7 @@ def parseReactions(lineReactions):
                     loop = "true" if (reactions[i][j] in existingReactions) else "false"
                     reactionOrderFile.write(
                 "INSERT INTO raw_reaction_order (parentid, childid, module, loop) VALUES ( '"
-                + parentReaction + "' , '" + reactions[i][j] +  "' , " + loop + " );\n")
+                + parentReaction + "' , '" + reactions[i][j] +  "' , '" + module +  "' , " + loop + " );\n")
                     print(parentReaction + '- ' +  reactions[i][j] , loop)
             existingReactions.append(reactions[i][j])
     print (existingReactions)

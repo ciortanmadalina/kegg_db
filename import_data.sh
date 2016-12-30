@@ -1,9 +1,6 @@
 #!/bin/bash
 # This script generates sql insert scripts for data import
 
-readonly N=3
-readonly pathway_module_file="output/insert_pathway_module.sql"
-unique_modules=()
 rm -r output
 mkdir output
 

@@ -238,19 +238,107 @@ order by root.pathway;
 
 ```
 
-These results are stored in a view (pathway_chain_reactions)
+These results are stored in a view (pathway_chain_reactions).  
+The last script (db_fine_tuning.sql) adds primary/foreign keys and indexes in order to improve queries performance.
+
 ### Results
-This project queries the kegg website (http://www.kegg.jp/kegg/docs/keggapi.html) in order to retrieve data about pathways, modules, reactions and compounds.
 
-setup.sh installs postresql and creates a database named "bio".  
-schema.sql creates the psql schema. A number of "raw" tables have been created to facilitate data import as their primary key is the functional kegg ID. In a second phase we will transfer data from raw tables to the tables implementing the final relational model.
+This section shows preview data from all tables:  
+```sql
+bio=# select * from biological_molecule limit 3;
+   id   |                                      name                                      |    formula     |   mass   | type
+--------+--------------------------------------------------------------------------------+----------------+----------+------
+ C00018 | Pyridoxal phosphate; Pyridoxal 5-phosphate; Pyridoxal 5'-phosphate; PLP        | C8H10NO6P      | 247.0246 |
+ C00022 | Pyruvate; Pyruvic acid; 2-Oxopropanoate; 2-Oxopropanoic acid; Pyroracemic acid | C3H4O3         | 88.016   |
+ C00024 | Acetyl-CoA; Acetyl coenzyme A                                                  | C23H38N7O17P3S | 809.1258 |
+(3 rows)
 
-import_data.sh makes get calls to rest webservices, parses the input and generates insert sql files ( e.g. insert_into_raw_pathway.sql, insert_into_raw_pathway_module.sql, etc)  
+```
 
-setup_db.sh first creates the schema using schema.sql, then invokes the insert files in order to populate the raw version of our tables.
+```sql
+bio=# select * from reaction limit 3;
+   id   |                    name                    |                       definition                        
+--------+--------------------------------------------+---------------------------------------------------------
+ R00200 | ATP:pyruvate 2-O-phosphotransferase        | ATP + Pyruvate <=> ADP + Phosphoenolpyruvate
+ R00238 | Acetyl-CoA:acetyl-CoA C-acetyltransferase  | 2 Acetyl-CoA <=> CoA + Acetoacetyl-CoA
+ R00259 | acetyl-CoA:L-glutamate N-acetyltransferase | Acetyl-CoA + L-Glutamate <=> CoA + N-Acetyl-L-glutamate
+(3 rows)
+
+```
+
+```sql
+bio=# select e.id, substring(e.name, 1, 50) from enzyme e limit 3;
+    id     |                     substring                      
+-----------+----------------------------------------------------
+ 1.1.1.145 | 3beta-hydroxy-Delta5-steroid dehydrogenase; proges
+ 1.1.1.211 | long-chain-3-hydroxyacyl-CoA dehydrogenase; beta-h
+ 1.1.1.23  | histidinol dehydrogenase; L-histidinol dehydrogena
+(3 rows)
+
+```
+
+```sql
+bio=# select p.id, p.name, substring(p.description, 1, 50), p.class from pathway p limit 3;
+    id    |             name             |                     substring                      |                class                
+----------+------------------------------+----------------------------------------------------+-------------------------------------
+ map00010 | Glycolysis / Gluconeogenesis | Glycolysis is the process of converting glucose in | Metabolism; Carbohydrate metabolism
+ map00020 | Citrate cycle (TCA cycle)    | The citrate cycle (TCA cycle, Krebs cycle) is an i | Metabolism; Carbohydrate metabolism
+ map00030 | Pentose phosphate pathway    | The pentose phosphate pathway is a process of gluc | Metabolism; Carbohydrate metabolism
+(3 rows)
+
+```
+
+```sql
+bio=# select * from reaction_order limit 3;
+ parentid | childid | loop | pathway  
+----------+---------+------+----------
+ R00238   | R01978  | f    | map00072
+ R00259   | R02649  | f    | map01230
+ R00267   | R00621  | f    | map00020
+(3 rows)
+
+```
+
+```sql
+bio=# select * from reaction_enzyme  limit 3;
+ reaction_id | enzyme_id
+-------------+-----------
+ R00200      | 2.7.1.40
+ R00238      | 2.3.1.9
+ R00259      | 2.3.1.1
+(3 rows)
+
+```
 
 
-There are cases when 1 module has references to multiple reactions comma separated:
-http://rest.kegg.jp/get/M00633  
-Even though in the modules file both reactions point to the same componds, the detailed pages point to different results. This scenario can be found from path http://rest.kegg.jp/get/path:map00030 (last module).
+```sql
+bio=# select * from reaction_molecule  limit 3;
+ molecule_id | reaction_id |   type    | coefficient
+-------------+-------------+-----------+-------------
+ C00022      | R00200      | PRODUCT   |            
+ C00074      | R00200      | SUBSTRATE |            
+ C00024      | R00238      | SUBSTRATE |            
+(3 rows)
+
+```
+
+
+```sql
+bio=# select * from pathway_chain_reactions limit 10;
+                                    chain_reactions                                     | circular | pathway  
+----------------------------------------------------------------------------------------+----------+----------
+ R00200->R00658->R01518->R07159->R01512->R01061->R01015->R01070->R09084->R02740->R02189 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R04779->R02740->R09085 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R04779->R02740->R01786 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01061->R01015->R01070->R09084->R02740->R09085 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R09084->R02740->R02189 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R09084->R02740->R09085 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R09084->R02740->R01786 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01063->R01015->R01070->R04779->R02740->R02189 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01061->R01015->R01070->R04779->R02740->R09085 | LINEAR   | map00010
+ R00200->R00658->R01518->R07159->R01512->R01061->R01015->R01070->R09084->R02740->R01786 | LINEAR   | map00010
+(10 rows)
+
+
+```
 

@@ -23,12 +23,12 @@ definition varchar (300)
 
 CREATE TABLE raw_reaction_compound (
 reaction varchar(10), 
-compound varchar(10), 
+compound varchar(15), 
 type varchar(10)
 );
 
 CREATE TABLE raw_compound (
-id varchar (10),
+id varchar (15),
 name varchar(500),
 formula varchar(100),
 mass varchar (100)
@@ -53,7 +53,7 @@ module varchar(10)
 );
 
 CREATE TABLE biological_molecule (
-id varchar (10),
+id varchar (15),
 name varchar(500),
 formula varchar(100),
 mass varchar (100),
@@ -84,7 +84,7 @@ reaction_id varchar (10)
 );
 
 CREATE TABLE reaction_molecule (
-molecule_id varchar (10),
+molecule_id varchar (15),
 reaction_id varchar (10),
 type varchar(10),
 coefficient REAL

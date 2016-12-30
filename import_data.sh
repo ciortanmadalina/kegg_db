@@ -50,7 +50,6 @@ compounds_from_insert_file ()
   #echo "Compounds: $compounds"
   for compound in "${compounds[@]}"
   do
-    #echo "compound= $compound"
     #download module file if it doesn't exist
     if [ ! -f "$compound" ]; then
       curl "http://rest.kegg.jp/get/$compound" > "$compound"
@@ -101,8 +100,15 @@ unique_values ()
   echo ${unique[@]}
 }
 
+remove_duplicate_lines()
+{
+  for file in ./output/*; do 
+    echo "$(sort -u "$file")" > "$file" 
+  done
+}
 #invocations
 parse_input_file
 compounds_from_insert_file
 reactions_from_insert_file
 enzymes_from_insert_file
+remove_duplicate_lines

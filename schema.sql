@@ -84,6 +84,6 @@ coefficient REAL
 );
 
 CREATE TABLE reaction_enzyme (
-molecule_id varchar (10),
+reaction_id varchar (10),
 enzyme_id varchar (15)
 );

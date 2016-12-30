@@ -13,20 +13,23 @@ module = sys.argv[1]
 
 moduleReactionFileName = 'output/insert_module_reaction.sql'
 reactionCompoundsFileName = 'output/insert_reaction_compound.sql'
+reactionOrderFileName = 'output/insert_reaction_order.sql'
 
 #read file
 data=utils.getFileContent(module)
 
 
-def parseReactions(reactions):
+def parseReactions(lineReactions):
     moduleReactionsFile = open(moduleReactionFileName, 'a')
     reactionCompoundsFile = open (reactionCompoundsFileName, 'a')
-    for line in reactions:
+    reactionOrderFile = open(reactionOrderFileName, 'a')
+    reactions = []
+
+    for line in lineReactions:
         # line looks like R05605  C04442 -> C00022 + C00118
         tokens = line.split()
-        reaction_name = tokens[0]
-        reaction_name= re.split('\+|,', reaction_name)[0]
-        moduleReactionsFile.write("INSERT INTO raw_module_reaction (module, reaction) VALUES ( '" + module + "' , '" + reaction_name + "' );\n")
+        lineReactions = re.split('\+|,', tokens[0])
+
         type = 'INPUT'
         for i in range(1, len(tokens)):
             if tokens[i] == '+':
@@ -34,19 +37,37 @@ def parseReactions(reactions):
             if tokens[i] == '->':
                 type = 'OUTPUT'
                 continue
-            reactionCompoundsFile.write(
+            for reaction_name in lineReactions:
+                reactionCompoundsFile.write(
                 "INSERT INTO raw_reaction_compound (reaction, compound, type) VALUES ( '" + reaction_name + "' , '"
                 + tokens[i]  + "' , '" +  type + "' );\n")
+        reactions.append(lineReactions)
+    print('reactions', reactions)
 
-        print(line)
+    existingReactions = []
+    for i in range(len(reactions)):
+        for j in range(len(reactions[i])):
+            moduleReactionsFile.write(
+                "INSERT INTO raw_module_reaction (module, reaction) VALUES ( '"
+                + module + "' , '" + reactions[i][j] + "' );\n")
+            if i > 0:
+                for parentReaction in reactions[i-1]:
+                    #INSERT INTO raw_reaction_order (parentid, childid, module, loop) VALUES ('n6', 'n1', 'm1', true);
+                    loop = "true" if (reactions[i][j] in existingReactions) else "false"
+                    reactionOrderFile.write(
+                "INSERT INTO raw_reaction_order (parentid, childid, module, loop) VALUES ( '"
+                + parentReaction + "' , '" + reactions[i][j] +  "' , " + loop + " );\n")
+                    print(parentReaction + '- ' +  reactions[i][j] , loop)
+            existingReactions.append(reactions[i][j])
+    print (existingReactions)
     moduleReactionsFile.close()
     reactionCompoundsFile.close()
+    reactionOrderFile.close()
     #better clean up in bash
-    utils.removeDuplicateLines(moduleReactionFileName)
-    utils.removeDuplicateLines(reactionCompoundsFileName)
+    #utils.removeDuplicateLines(moduleReactionFileName)
+    #utils.removeDuplicateLines(reactionCompoundsFileName)
 
 #Method invocations
 
 reactions = utils.getSectionArray("REACTION", data,  "\n")
 parseReactions(reactions)
-

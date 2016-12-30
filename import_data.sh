@@ -4,10 +4,6 @@
 rm -r output
 mkdir output
 
-if [ ! -f pathway ]; then
-  curl http://rest.kegg.jp/list/pathway > pathway
-fi
-
 parse_input_file ()
 {
   input_file="input"

@@ -25,6 +25,9 @@ All biological entities have an unique identifier which can be used in get queri
 
 ### Implementation
 A conceptual model (.svg file) has been created by the biologists' team.  
+
+![Image](https://raw.githubusercontent.com/ciortanmadalina/kegg_db/master/conceptual_diagram.png)
+
 It became clear very quickly that the conceptual model doesn't match perfectly the reality of data available on Kegg.  
 The following differences can be mentioned:
 - Kegg doesn't provide data about the classification of biological molecules as proteins, nucleic acids, metabolites, polysaccharides, nor about the number of amino-acids or bases they are composed of  
@@ -152,6 +155,8 @@ At this point we have all Kegg data accessible in SQL.
 #### 2. Transform raw data to desired schema
 
 This phase creates the final SQL schema, matching the conceptual model as such:
+
+![Image](https://raw.githubusercontent.com/ciortanmadalina/kegg_db/master/db_schema.png)
 
 ```sql
 CREATE TABLE biological_molecule (

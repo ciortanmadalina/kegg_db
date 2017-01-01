@@ -352,7 +352,7 @@ bio=# select * from pathway_reaction where pathway_id = 'map00010';
 
 ```
 
-Enzymes cathalysing these reactions can be retrieved:
+Enzymes catalysing these reactions can be retrieved:
 
 ```sql
 bio=# select re.reaction_id, substring(e.name, 1, 100) as enzyme_name from enzyme e, reaction_enzyme re where re.reaction_id in ( select reaction_id from pathway_reaction where pathway_id = 'map00010') and e.id = re.enzyme_id limit 5;

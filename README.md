@@ -4,7 +4,7 @@
 
 ### Project scope
 
-This project constitutes a learning exercise for both modelling a biological component (metabolic pathways) using the entity-relationship paradigm and the hands on implementation of the conceptual schema in a PostgreSQL database.
+This project constitutes a learning exercise for both modeling a biological component (metabolic pathways) using the entity-relationship paradigm and the hands on implementation of the conceptual schema in a PostgreSQL database.
 
 ### Resources
 
@@ -326,6 +326,66 @@ bio=# select * from reaction_molecule  limit 3;
 (3 rows)
 
 ```
+
+Reactions associated to a pathway can be retrived :
+
+```sql
+bio=# select * from pathway_reaction where pathway_id = 'map00010';
+ pathway_id | reaction_id 
+------------+-------------
+ map00010   | R00200
+ map00010   | R00658
+ map00010   | R01015
+ map00010   | R01061
+ map00010   | R01063
+ map00010   | R01070
+ map00010   | R01512
+ map00010   | R01518
+ map00010   | R01786
+ map00010   | R02189
+ map00010   | R02740
+ map00010   | R04779
+ map00010   | R07159
+ map00010   | R09084
+ map00010   | R09085
+(15 rows)
+
+```
+
+Enzymes cathalysing these reactions can be retrieved:
+
+```sql
+bio=# select re.reaction_id, substring(e.name, 1, 100) as enzyme_name from enzyme e, reaction_enzyme re where re.reaction_id in ( select reaction_id from pathway_reaction where pathway_id = 'map00010') and e.id = re.enzyme_id limit 5;
+
+
+reaction_id |                                             enzyme_name                                              
+-------------+------------------------------------------------------------------------------------------------------
+ R00200      | pyruvate kinase; phosphoenolpyruvate kinase; phosphoenol transphosphorylase
+ R00658      | phosphopyruvate hydratase; enolase; 2-phosphoglycerate dehydratase; 14-3-2-protein; nervous-system s
+ R01015      | triose-phosphate isomerase; phosphotriose isomerase; triose phosphoisomerase; triose phosphate mutas
+ R01061      | glyceraldehyde-3-phosphate dehydrogenase (phosphorylating); triosephosphate dehydrogenase; dehydroge
+ R01061      | glyceraldehyde-3-phosphate dehydrogenase (NAD(P)+) (phosphorylating); triosephosphate dehydrogenase 
+(5 rows)
+
+
+```
+
+Biological molecules participating in such reactions can be retrieved:  
+
+```sql
+
+bio=# select rm.reaction_id, m.id, substring (m.name, 1, 50), m.formula, m.mass, rm.type from biological_molecule m, reaction_molecule rm where m.id = rm.molecule_id and rm.reaction_id = 'R00200';
+
+ reaction_id |   id   |                     substring                      | formula |   mass   |   type    
+-------------+--------+----------------------------------------------------+---------+----------+-----------
+ R00200      | C00022 | Pyruvate; Pyruvic acid; 2-Oxopropanoate; 2-Oxoprop | C3H4O3  | 88.016   | PRODUCT
+ R00200      | C00074 | Phosphoenolpyruvate; Phosphoenolpyruvic acid; PEP  | C3H5O6P | 167.9824 | SUBSTRATE
+(2 rows)
+
+
+```
+
+In order to visualise the chain reactions generated using "with recursive", pathway_chain_reactions view can be queried :  
 
 
 ```sql
